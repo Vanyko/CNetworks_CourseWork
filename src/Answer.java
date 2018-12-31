@@ -1,0 +1,4 @@
+public enum Answer {
+    ACK, NACK, REWRITEROUTE, DATA,
+    CONNECTION, DISCONNECTION
+}
