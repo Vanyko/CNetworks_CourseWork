@@ -7,8 +7,9 @@ public class Packet {
     private static int nextId = 1;
     private int id;
     private int size;
-    private Answer answer;
+    private Status status;
     private TransferType transferType;
+    private int linkId; // logic link id
 
     public Packet(int srcAddr, int dstAddr, int data) {
         this.srcAddr = srcAddr;
@@ -18,8 +19,9 @@ public class Packet {
         this.data = data;
         this.size = data;
         this.id = getNextId();
-        this.answer = Answer.DATA;
+        this.status = Status.DATA;
         this.transferType = TransferType.DATAGRAM;
+        this.linkId = -1;
     }
 
     public Packet(int srcAddr, int dstAddr, int data, TransferType transferType) {
@@ -30,8 +32,51 @@ public class Packet {
         this.data = data;
         this.size = data;
         this.id = getNextId();
-        this.answer = Answer.DATA;
+        this.status = Status.DATA;
         this.transferType = transferType;
+        this.linkId = -1;
+    }
+
+    public int getLinkId() {
+        return linkId;
+    }
+
+    public void setLinkId(int linkId) {
+        this.linkId = linkId;
+    }
+
+    public Packet(int srcAddr, int dstAddr, int data, TransferType transferType, Status status) {
+        this.srcAddr = srcAddr;
+        this.dstAddr = dstAddr;
+        this.counter = 0;
+        this.error = false;
+        this.data = data;
+        this.size = data;
+        this.id = getNextId();
+        this.status = status;
+        this.transferType = transferType;
+        this.linkId = -1;
+    }
+
+    public Packet(int srcAddr, int dstAddr, int data, TransferType transferType, Status status, int linkId) {
+        this.srcAddr = srcAddr;
+        this.dstAddr = dstAddr;
+        this.counter = 0;
+        this.error = false;
+        this.data = data;
+        this.size = data;
+        this.id = getNextId();
+        this.status = status;
+        this.transferType = transferType;
+        this.linkId = linkId;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Packet(int srcAddr, int dstAddr) {
@@ -46,7 +91,7 @@ public class Packet {
 
         this.size = data;
         this.id = getNextId();
-        this.answer = Answer.DATA;
+        this.status = Status.DATA;
         this.transferType = TransferType.DATAGRAM;
     }
 
@@ -58,7 +103,7 @@ public class Packet {
         this.error = false;
         this.size = data;
         this.id = getNextId();
-        this.answer = Answer.DATA;
+        this.status = Status.DATA;
         this.transferType = TransferType.DATAGRAM;
     }
 
@@ -70,11 +115,11 @@ public class Packet {
         this.data = packet.getData();
         this.size = packet.getSize();
         this.id = packet.getId();
-        this.answer = packet.getAnswer();
+        this.status = packet.getStatus();
         this.transferType = packet.getTransferType();
     }
 
-    public Packet(Packet packet, Answer answer){
+    public Packet(Packet packet, Status STATUS){
         this.srcAddr = packet.getSrcAddr();
         this.dstAddr = packet.getDstAddr();
         this.counter = packet.getCounter();
@@ -82,7 +127,7 @@ public class Packet {
         this.data = packet.getData();
         this.size = packet.getSize();
         this.id = packet.reverseId();
-        this.answer = answer;
+        this.status = STATUS;
         this.transferType = packet.getTransferType();
     }
 
@@ -110,14 +155,6 @@ public class Packet {
 //        this.dstAddr = dstAddr;
 //    }
 
-
-    public Answer getAnswer() {
-        return answer;
-    }
-
-    public void setAnswer(Answer answer) {
-        this.answer = answer;
-    }
 
     public int getCounter() {
         return counter;
@@ -157,15 +194,15 @@ public class Packet {
     }
 
     public boolean isService(){
-        return answer != Answer.DATA;
+        return status != Status.DATA;
     }
 
     public boolean isACK(){
-        return answer == Answer.ACK;
+        return status == Status.ACK;
     }
 
     public boolean isNACK(){
-        return answer == Answer.NACK;
+        return status == Status.NACK;
     }
 
     public TransferType getTransferType() {
@@ -186,7 +223,7 @@ public class Packet {
                 ", data=" + data +
                 ", error=" + error +
                 ", size=" + size +
-                ", answer=" + answer +
+                ", Status=" + status +
                 '}';
     }
 }

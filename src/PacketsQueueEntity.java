@@ -9,12 +9,6 @@ public class PacketsQueueEntity implements Comparable<PacketsQueueEntity>{
         this.time = time;
     }
 
-//    public PacketsQueueEntity(Packet packet, int nodeAddr) {
-//        this.packet = packet;
-//        this.nodeAddr = nodeAddr;
-//        this.time = 0;
-//    }
-
     public PacketsQueueEntity(PacketsQueueEntity entity) {
         this.packet = entity.getPacket();
         this.nodeAddr = entity.getNodeAddr();

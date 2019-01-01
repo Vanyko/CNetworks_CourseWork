@@ -10,8 +10,11 @@ public class Node implements Comparable<Node>{
     private ArrayList<PacketsQueueEntity> inputPacketsQueue;
     private ArrayList<PacketsQueueEntity> outputPacketsQueue;
     private ArrayList<PacketsQueueEntity> notDeliveredPackets;
+    private ArrayList<PacketsQueueEntity> delayedPackets;
+    private ArrayList<LogicLinkTableEntity> logicLinksTable;
+    private ArrayList<VirtualChanelTableEntity> virtualChanelsTable;
     private HashSet<Integer> deliveredPackets;
-    int currentTime;
+    private int currentTime;
 
     private static final int TIME_TO_WAIT = 3500;
 
@@ -24,6 +27,9 @@ public class Node implements Comparable<Node>{
         this.notDeliveredPackets = new ArrayList<>();
         this.deliveredPackets = new HashSet<>();
         this.currentTime = 0;
+        this.delayedPackets = new ArrayList<>();
+        this.logicLinksTable = new ArrayList<>();
+        this.virtualChanelsTable = new ArrayList<>();
     }
 
 //    public Node(Node node) {
@@ -176,6 +182,30 @@ public class Node implements Comparable<Node>{
                 }
             }
         }
+
+        if (entity.getPacket().getTransferType() == TransferType.LOGIC_CONNECTION) {
+            if (entity.getPacket().getStatus() == Status.CONNECTION){
+                // TODO: check if there is already no such entity
+                logicLinksTable.add(new LogicLinkTableEntity(entity.getPacket().getLinkId(), currentTime, Status.CONNECTION, entity.getPacket().getDstAddr()));
+            } else if (entity.getPacket().getStatus() == Status.DATA){
+
+            } else if (entity.getPacket().getStatus() == Status.DISCONNECTION){
+                LogicLinkTableEntity logicLink = getLogicLinkEntityById(entity.getPacket().getLinkId());
+                if (logicLink != null){
+                    logicLink.setStatus(Status.DISCONNECTION);
+                }
+            }
+        }
+    }
+
+    public LogicLinkTableEntity getLogicLinkEntityById(int id){
+        for (int i = 0; i < logicLinksTable.size(); i++){
+            LogicLinkTableEntity buf = logicLinksTable.get(i);
+            if (buf.getId() == id){
+                return buf;
+            }
+        }
+        return null;
     }
 
     public void manageServicePacket(PacketsQueueEntity entity){
@@ -194,17 +224,63 @@ public class Node implements Comparable<Node>{
             entity.setTime(currentTime);
             outputPacketsQueue.add(notDelivered);
             notDeliveredPackets.remove(notDelivered);
-        } else if (entity.getPacket().getAnswer() == Answer.REWRITEROUTE){
+        } else if (entity.getPacket().getStatus() == Status.REWRITEROUTE){
             routesTable.correctRoute(entity);
             int prevAddr = routesTable.getPrevAddrByRoute(entity.getPacket().getSrcAddr(), entity.getPacket().getDstAddr());
             if ((prevAddr != this.id) && (prevAddr != -1)){
-                outputPacketsQueue.add(new PacketsQueueEntity(new Packet(entity.getPacket(), Answer.REWRITEROUTE), prevAddr, currentTime));
+                outputPacketsQueue.add(new PacketsQueueEntity(new Packet(entity.getPacket(), Status.REWRITEROUTE), prevAddr, currentTime));
+            }
+        } else if (entity.getPacket().getTransferType() == TransferType.LOGIC_CONNECTION){
+            if (entity.getPacket().getStatus() == Status.CONNECTION) {
+                if (entity.getPacket().getDstAddr() == this.id) {
+                    // decide of make a connection
+                    int srcAddr = entity.getPacket().getSrcAddr();
+                    outputPacketsQueue.add(new PacketsQueueEntity(
+                            new Packet(this.id, srcAddr, 1, TransferType.LOGIC_CONNECTION, Status.CONNECTION_ACK), entity.getNodeAddr(), currentTime));
+                } else {
+                    route(entity);
+                }
+            } else if (entity.getPacket().getStatus() == Status.CONNECTION_ACK) {
+                if (entity.getPacket().getDstAddr() == this.id) {
+                    // connection successful
+                    System.out.println("connection successful");
+//                     TODO: rewrite logic link table
+                    LogicLinkTableEntity logicLink = getLogicLinkEntityById(entity.getPacket().getLinkId());
+                    if (logicLink != null){
+                        logicLink.setStatus(Status.DATA);
+                    }
+                } else {
+                    route(entity);
+                }
+            } else if (entity.getPacket().getStatus() == Status.DISCONNECTION) {
+                if (entity.getPacket().getDstAddr() == this.id) {
+                    // decide of make a disconnection
+                    // TODO: delete entity in logicLinkTable
+                    int srcAddr = entity.getPacket().getSrcAddr();
+                    outputPacketsQueue.add(new PacketsQueueEntity(
+                            new Packet(this.id, srcAddr, 1, TransferType.LOGIC_CONNECTION, Status.DISCONNECTION_ACK), entity.getNodeAddr(), currentTime));
+                } else {
+                    route(entity);
+                }
+            } else if (entity.getPacket().getStatus() == Status.DISCONNECTION_ACK) {
+                if (entity.getPacket().getDstAddr() == this.id) {
+                    // connection successful
+                    System.out.println("disconnection successful");
+                    // TODO: delete entity in logicLinkTable
+                    LogicLinkTableEntity logicLink = getLogicLinkEntityById(entity.getPacket().getLinkId());
+                    if (logicLink != null){
+//                        logicLink.setStatus(Status.DISCONNECTION_ACK);
+                        logicLinksTable.remove(logicLink);
+                    }
+                } else {
+                    route(entity);
+                }
             }
         }
     }
 
     public void manageDeliveredPacket(PacketsQueueEntity entity){
-//        outputPacketsQueue.add(new PacketsQueueEntity(new Packet(entity.getPacket(), Answer.ACK), entity.getNodeAddr()));  // Send ACK to prev node
+//        outputPacketsQueue.add(new PacketsQueueEntity(new Packet(entity.getPacket(), Status.ACK), entity.getNodeAddr()));  // Send ACK to prev node
 //        System.out.printf("Packet %s delivered!\n", entity.getPacket());
         // Add it to routes table
 //                        // TODO: check next line
@@ -219,38 +295,37 @@ public class Node implements Comparable<Node>{
             Node node = (Node) neighboursArray[i];
             if (node.getId() != prevNodeAddr) {
                 outputPacketsQueue.add(new PacketsQueueEntity(entity.getPacket(), node.getId(), currentTime));
-//                                    inputEntitiesToRemove.add(entity);
             }
         }
     }
 
+    public Status getStatusByLogicLinkId(int id){
+        for (LogicLinkTableEntity entity : logicLinksTable){
+            if (entity.getId() == id){
+                return entity.getStatus();
+            }
+        }
+        return null;
+    }
+
     public void route(PacketsQueueEntity entity){
         Packet packet = entity.getPacket();
-//        packet.incCounter();
-//        // Send ACK to prev node
-//        outputPacketsQueue.add(new PacketsQueueEntity(new Packet(packet, Answer.ACK), entity.getNodeAddr()));
-        // Add it to routes table. If it's already consists, don't do anything.
-//        if (alreadyIn(entity)) {
-//            // Correct routes table
-////                    // TODO: manage prev node (correct table in prev node)
-//            routesTable.correctRoute(entity);
-//        } else {
-//
-//
-////                        // TODO: check next line
-//            routesTable.addPacket(packet, entity.getNodeAddr());
+        if ((packet.getTransferType() == TransferType.DATAGRAM) || (packet.getTransferType() == TransferType.LOGIC_CONNECTION)) {
             // route packet
-//                        Packet packet = entity.getPacket();
             int nextAddr = routesTable.getNextAddrByRoute(packet.getSrcAddr(), packet.getDstAddr());
             if (nextAddr != -1) {
                 outputPacketsQueue.add(new PacketsQueueEntity(packet, nextAddr, currentTime));
-                //                    inputPacketsQueue.remove(entity);
-//                            inputEntitiesToRemove.add(entity);
             } else {
                 // route not found, or server not respond.
                 // send to all neighbours
                 sendToAllNeighbours(entity);
             }
+        }
+//        else if (packet.getTransferType() == TransferType.LOGIC_CONNECTION){
+//            // if logic conn is in connection mode, then delay packet, else generate connection
+////            if ((getStatusByLogicLinkId() != null) && (getStatusByLogicLinkId() == Status.CONNECTION)){
+////
+////            }
 //        }
 
         deliveredPackets.add(packet.getId());
@@ -258,11 +333,11 @@ public class Node implements Comparable<Node>{
 
     public void manageCorrectRoutePacket(PacketsQueueEntity entity){
         if (entity.getPacket().getCounter() < routesTable.getCounter(entity)) {
-            Packet correctRoutePacket = new Packet(entity.getPacket(), Answer.REWRITEROUTE);
+            Packet correctRoutePacket = new Packet(entity.getPacket(), Status.REWRITEROUTE);
             outputPacketsQueue.add(new PacketsQueueEntity(correctRoutePacket, entity.getNodeAddr(), currentTime));
         } else if (routesTable.getCounter(entity) <= 0){
             routesTable.addPacket(new Packet(entity.getPacket()), entity.getNodeAddr());
-            Packet correctRoutePacket = new Packet(entity.getPacket(), Answer.REWRITEROUTE);
+            Packet correctRoutePacket = new Packet(entity.getPacket(), Status.REWRITEROUTE);
             outputPacketsQueue.add(new PacketsQueueEntity(correctRoutePacket, entity.getNodeAddr(), currentTime));
         }
     }
@@ -270,10 +345,10 @@ public class Node implements Comparable<Node>{
     public boolean manageACK(PacketsQueueEntity entity){
         Packet packet = entity.getPacket();
         if (packet.isError()){
-            outputPacketsQueue.add(new PacketsQueueEntity(new Packet(packet, Answer.NACK), entity.getNodeAddr(),currentTime));
+            outputPacketsQueue.add(new PacketsQueueEntity(new Packet(packet, Status.NACK), entity.getNodeAddr(),currentTime));
             return false;
         } else {
-            outputPacketsQueue.add(new PacketsQueueEntity(new Packet(packet, Answer.ACK), entity.getNodeAddr(), currentTime));
+            outputPacketsQueue.add(new PacketsQueueEntity(new Packet(packet, Status.ACK), entity.getNodeAddr(), currentTime));
         }
         return true;
     }
@@ -284,8 +359,6 @@ public class Node implements Comparable<Node>{
     public ArrayList<PacketsQueueEntity> manageInputPackets(){
         ArrayList<PacketsQueueEntity> inputEntitiesToRemove = new ArrayList<>();
         for (PacketsQueueEntity entity : inputPacketsQueue){  // process input packets & manageInputPackets it
-//            if (neighbours.get(getNeighbourById(entity.getNodeAddr())).isFree(this.id - entity.getNodeAddr())) {
-//                System.out.printf("Received from %d in %d : %s\n", entity.getNodeAddr(), this.id, entity.getPacket().toString());
                 if (entity.getPacket().isService()) {  // its a service packet. Acknowledgment or correct manageInputPackets.
                     manageServicePacket(entity);
                 } else {
@@ -293,16 +366,8 @@ public class Node implements Comparable<Node>{
                     packet.incCounter();
                     // Send ACK to prev node
                     if (manageACK(entity)) {
-//                        outputPacketsQueue.add(new PacketsQueueEntity(new Packet(packet, Answer.ACK), entity.getNodeAddr()));
-//                Packet packet = new Packet(entity.getPacket());
                         if (alreadyIn(entity)) {
-                            // if counter less, correct prev node table
-//                        int oldCounter = routesTable.getCounter(entity);
-//                        int newCounter = entity.getPacket().getCounter();
-//                        if (newCounter > oldCounter) {
-//                            // send CorrectRoute to prev node
-////                            manageCorrectRoutePacket(entity);
-//                        }
+
                         } else {
                             if (packet.getDstAddr() == this.id) {
                                 manageDeliveredPacket(entity);
@@ -315,15 +380,6 @@ public class Node implements Comparable<Node>{
                     }
                 }
                 inputEntitiesToRemove.add(entity);
-//            }
-
-//            // TODO: manage this, prev node (correct table in prev node)
-//            int nextAddr = routesTable.getNextAddrByDst(entity.getPacket().getDstAddr());
-//            if (nextAddr == -1){
-//                routesTable.addPacket(entity.getPacket(), entity.getNodeAddr());
-//            } else {
-//                routesTable.correctRoute(entity);
-//            }
         }
         return inputEntitiesToRemove;
     }
@@ -341,10 +397,8 @@ public class Node implements Comparable<Node>{
                 Canal canal = neighbours.get(neighbour);
                 if (canal.isFree(this.id - entity.getNodeAddr())) {
                     Packet packet = new Packet(entity.getPacket());
-    //                neighbour.addPacket(packet, this.id);
                     canal.setPacket(packet, this.id - entity.getNodeAddr());
                     outputEntitiesToRemove.add(entity);
-    //                System.out.printf("Send from %d to %d : %s\n", this.id, neighbour.getId(), packet.toString());
                 }
             } catch (Exception e){
                 e.printStackTrace();

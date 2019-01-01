@@ -1,6 +1,7 @@
 import GUI.GUI;
 
 import javax.swing.*;
+import java.util.ArrayList;
 
 /**
  * Created by Vanyko on 11/15/18.
@@ -36,8 +37,6 @@ public class Main {
             }
         }
 
-
-
         System.out.println(network.toString());
 
         network.printAllShortestRoutes();
@@ -45,15 +44,28 @@ public class Main {
         System.out.printf("time = %d\n", time);
 
 //        network.generatePacket(0, 3, time);
-        network.generateMessages(0, 3, time, 10, 3, TransferType.DATAGRAM);
+//        network.generateMessages(0, 3, time, 10, 3, TransferType.DATAGRAM);
+        network.generateLogicLinkConnection(0, 3, time, 0);
         boolean flag = true;
         while (flag){
             flag = network.tick(time);
             time++;
         }
-//
-        System.out.printf("time = %d\n", time);
 
-        // TODO: duplex is not working fine
+        network.generatePacket(0, 3, time, 10, TransferType.LOGIC_CONNECTION, Status.DATA, 0);
+        flag = true;
+        while (flag){
+            flag = network.tick(time);
+            time++;
+        }
+
+        network.closeLogicLinkConnection(0, 3, time, 0);
+        flag = true;
+        while (flag){
+            flag = network.tick(time);
+            time++;
+        }
+
+        System.out.printf("time = %d\n", time);
     }
 }

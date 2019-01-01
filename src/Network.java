@@ -10,6 +10,7 @@ public class Network {
 
     private ArrayList<Integer> possibleWeights = new ArrayList<>();
     double errorProbability = 0.000001;
+    private static int nextLinkId = 0;
 
     public Network() {
         this.network = new ArrayList<>();
@@ -150,8 +151,8 @@ public class Network {
         }
     }
 
-    public void generatePacket(int nodeId){
-        int srcAddr = nodeId, dstAddr = 0;
+    public void generatePacket(int srcAddr){
+        int dstAddr = 0;
         Random random = new Random();
         while (dstAddr == srcAddr){
             dstAddr = random.nextInt(network.size());
@@ -174,15 +175,30 @@ public class Network {
         }
     }
 
-    public void generatePacket(int nodeId, int dstAddr, int time){
-        int srcAddr = nodeId;
+    public void generatePacket(int srcAddr, int dstAddr, int time){
         Packet packet = new Packet(srcAddr, dstAddr);
         getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
     }
 
-    public void generatePacket(int nodeId, int time, Packet p){
-        int srcAddr = nodeId;
+    public void generatePacket(int srcAddr, int time, Packet p){
         Packet packet = new Packet(p);
+        getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
+    }
+
+    public void generatePacket(int srcAddr, int dstAddr, int time, int pSize, TransferType transferType, Status status, int linkId){
+        Packet packet = new Packet(srcAddr, dstAddr, pSize, transferType, status, linkId);
+        getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
+    }
+
+    public void generateLogicLinkConnection(int srcAddr, int dstAddr, int time, int linkId){
+        int servicePacketSize = 1;
+        Packet packet = new Packet(srcAddr, dstAddr, servicePacketSize, TransferType.LOGIC_CONNECTION, Status.CONNECTION, linkId);
+        getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
+    }
+
+    public void closeLogicLinkConnection(int srcAddr, int dstAddr, int time, int linkId){
+        int servicePacketSize = 1;
+        Packet packet = new Packet(srcAddr, dstAddr, servicePacketSize, TransferType.LOGIC_CONNECTION, Status.DISCONNECTION, linkId);
         getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
     }
 
