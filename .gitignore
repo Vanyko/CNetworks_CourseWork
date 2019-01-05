@@ -1,6 +1,6 @@
 
 .DS_Store
-.idea/workspace.xml
+.idea/
 out/production/CourseWK/GUI/GUI$1.class
 out/production/CourseWK/GUI/GUI$2.class
 out/production/CourseWK/GUI/GUI.class
