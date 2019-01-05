@@ -1,3 +1,5 @@
+package main;
+
 public class VirtualChanelTableEntity extends LogicLinkTableEntity {
     int nextAddr;
 

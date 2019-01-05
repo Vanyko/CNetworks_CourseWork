@@ -1,36 +1,40 @@
+package main;
+
 import java.util.Random;
 
 public class Packet {
     private int srcAddr, dstAddr, counter; // counter = nodes counter
-    private int data;
+    private int serviceLength;
+    private int informationLength;
     private boolean error;
     private static int nextId = 1;
     private int id;
-    private int size;
     private Status status;
     private TransferType transferType;
     private int linkId; // logic link id
 
-    public Packet(int srcAddr, int dstAddr, int data) {
+    public Packet(int srcAddr, int dstAddr, int serviceLength, int informationLength) {
         this.srcAddr = srcAddr;
         this.dstAddr = dstAddr;
         this.counter = 0;
         this.error = false;
-        this.data = data;
-        this.size = data;
+        this.serviceLength = serviceLength;
+        this.informationLength = informationLength;
+//        this.size = serviceLength + informationLength;
         this.id = getNextId();
         this.status = Status.DATA;
         this.transferType = TransferType.DATAGRAM;
         this.linkId = -1;
     }
 
-    public Packet(int srcAddr, int dstAddr, int data, TransferType transferType) {
+    public Packet(int srcAddr, int dstAddr, int serviceLength, int informationLength, TransferType transferType) {
         this.srcAddr = srcAddr;
         this.dstAddr = dstAddr;
         this.counter = 0;
         this.error = false;
-        this.data = data;
-        this.size = data;
+        this.serviceLength = serviceLength;
+        this.informationLength = informationLength;
+//        this.size = serviceLength + informationLength;
         this.id = getNextId();
         this.status = Status.DATA;
         this.transferType = transferType;
@@ -45,26 +49,28 @@ public class Packet {
         this.linkId = linkId;
     }
 
-    public Packet(int srcAddr, int dstAddr, int data, TransferType transferType, Status status) {
+    public Packet(int srcAddr, int dstAddr, int serviceLength, int informationLength, TransferType transferType, Status status) {
         this.srcAddr = srcAddr;
         this.dstAddr = dstAddr;
         this.counter = 0;
         this.error = false;
-        this.data = data;
-        this.size = data;
+        this.serviceLength = serviceLength;
+        this.informationLength = informationLength;
+//        this.size = serviceLength + informationLength;
         this.id = getNextId();
         this.status = status;
         this.transferType = transferType;
         this.linkId = -1;
     }
 
-    public Packet(int srcAddr, int dstAddr, int data, TransferType transferType, Status status, int linkId) {
+    public Packet(int srcAddr, int dstAddr, int serviceLength, int informationLength, TransferType transferType, Status status, int linkId) {
         this.srcAddr = srcAddr;
         this.dstAddr = dstAddr;
         this.counter = 0;
         this.error = false;
-        this.data = data;
-        this.size = data;
+        this.serviceLength = serviceLength;
+        this.informationLength = informationLength;
+//        this.size = serviceLength + informationLength;
         this.id = getNextId();
         this.status = status;
         this.transferType = transferType;
@@ -87,21 +93,22 @@ public class Packet {
 
         Random random = new Random();
 //        this.data = (random.nextInt(10) + 1) * 10;
-        this.data = 1;
-
-        this.size = data;
+        this.serviceLength = 1;
+        this.informationLength = 1;
+//        this.size = serviceLength + informationLength;
         this.id = getNextId();
         this.status = Status.DATA;
         this.transferType = TransferType.DATAGRAM;
     }
 
-    public Packet(int srcAddr, int dstAddr, int counter, int data) {
+    public Packet(int srcAddr, int dstAddr, int counter, int serviceLength, int informationLength) {
         this.srcAddr = srcAddr;
         this.dstAddr = dstAddr;
         this.counter = counter;
-        this.data = data;
         this.error = false;
-        this.size = data;
+        this.serviceLength = serviceLength;
+        this.informationLength = informationLength;
+//        this.size = serviceLength + informationLength;
         this.id = getNextId();
         this.status = Status.DATA;
         this.transferType = TransferType.DATAGRAM;
@@ -112,8 +119,9 @@ public class Packet {
         this.dstAddr = packet.getDstAddr();
         this.counter = packet.getCounter();
         this.error = packet.isError();
-        this.data = packet.getData();
-        this.size = packet.getSize();
+        this.serviceLength = packet.getServiceLength();
+        this.informationLength = packet.getInformationLength();
+//        this.size = packet.getSize();
         this.id = packet.getId();
         this.status = packet.getStatus();
         this.transferType = packet.getTransferType();
@@ -124,19 +132,16 @@ public class Packet {
         this.dstAddr = packet.getDstAddr();
         this.counter = packet.getCounter();
         this.error = packet.isError();
-        this.data = packet.getData();
-        this.size = packet.getSize();
+        this.serviceLength = packet.getServiceLength();
+        this.informationLength = packet.getInformationLength();
+//        this.size = packet.getSize();
         this.id = packet.reverseId();
         this.status = STATUS;
         this.transferType = packet.getTransferType();
     }
 
     public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
+        return serviceLength + informationLength;
     }
 
     public int getSrcAddr() {
@@ -177,10 +182,6 @@ public class Packet {
         this.error = error;
     }
 
-    public int getData() {
-        return data;
-    }
-
     public int getNextId(){
         return nextId++;
     }
@@ -213,17 +214,51 @@ public class Packet {
         this.transferType = transferType;
     }
 
+    public void setSrcAddr(int srcAddr) {
+        this.srcAddr = srcAddr;
+    }
+
+    public void setDstAddr(int dstAddr) {
+        this.dstAddr = dstAddr;
+    }
+
+    public int getServiceLength() {
+        return serviceLength;
+    }
+
+    public void setServiceLength(int serviceLength) {
+        this.serviceLength = serviceLength;
+    }
+
+    public int getInformationLength() {
+        return informationLength;
+    }
+
+    public void setInformationLength(int informationLength) {
+        this.informationLength = informationLength;
+    }
+
+    public static void setNextId(int nextId) {
+        Packet.nextId = nextId;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
-        return "Packet{" +
-                "id = " + id +
-                ", srcAddr=" + srcAddr +
+        return "main.Packet{" +
+                "srcAddr=" + srcAddr +
                 ", dstAddr=" + dstAddr +
                 ", counter=" + counter +
-                ", data=" + data +
+                ", serviceLength=" + serviceLength +
+                ", informationLength=" + informationLength +
                 ", error=" + error +
-                ", size=" + size +
-                ", Status=" + status +
+                ", id=" + id +
+                ", status=" + status +
+                ", transferType=" + transferType +
+                ", linkId=" + linkId +
                 '}';
     }
 }

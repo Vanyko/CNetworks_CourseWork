@@ -1,3 +1,5 @@
+package main;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -87,10 +89,10 @@ public class Network {
             network.add(new Node(i));
         }
 
-//        for (Node node : network){
-//            for (Node neighbour : network){
+//        for (main.Node node : network){
+//            for (main.Node neighbour : network){
 //                if ((neighbour != node) && (!node.getNeighbours().containsKey(neighbour))){
-//                    Canal canal = new Canal();
+//                    main.Canal canal = new main.Canal();
 //                    canals.add(canal);
 //                    node.addNeighbour(neighbour, canal);
 //                    neighbour.addNeighbour(node, canal);
@@ -161,16 +163,16 @@ public class Network {
         System.out.println(packet);
     }
 
-    public void generateMessages(int nodeId, int dstAddr, int time, int msgSize, int pcketSize, TransferType transferType){
+    public void generateMessages(int nodeId, int dstAddr, int time, int msgSize, int serviceSize, int infSize, TransferType transferType){
         while (msgSize != 0){
-            int pSize = 0;
-            if (msgSize - pcketSize <= 0){
-                pSize = msgSize;
+            int iSize = 0;
+            if (msgSize - infSize <= 0){
+                iSize = msgSize;
             } else {
-                pSize = pcketSize;
+                iSize = infSize;
             }
-            msgSize -= pSize;
-            Packet packet = new Packet(nodeId, dstAddr, pSize, transferType);
+            msgSize -= iSize;
+            Packet packet = new Packet(nodeId, dstAddr, serviceSize, iSize, transferType);
             generatePacket(nodeId, time, packet);
         }
     }
@@ -185,20 +187,19 @@ public class Network {
         getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
     }
 
-    public void generatePacket(int srcAddr, int dstAddr, int time, int pSize, TransferType transferType, Status status, int linkId){
-        Packet packet = new Packet(srcAddr, dstAddr, pSize, transferType, status, linkId);
+    public void generatePacket(int srcAddr, int dstAddr, int time, int serviceSize, int infSize, TransferType transferType, Status status, int linkId){
+        Packet packet = new Packet(srcAddr, dstAddr, serviceSize, infSize, transferType, status, linkId);
         getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
     }
 
-    public void generateLogicLinkConnection(int srcAddr, int dstAddr, int time, int linkId){
-        int servicePacketSize = 1;
-        Packet packet = new Packet(srcAddr, dstAddr, servicePacketSize, TransferType.LOGIC_CONNECTION, Status.CONNECTION, linkId);
+    public void generateLogicLinkConnection(int srcAddr, int dstAddr, int time, int linkId, int servceSize){
+        Packet packet = new Packet(srcAddr, dstAddr, servceSize, 0, TransferType.LOGIC_CONNECTION, Status.CONNECTION, linkId);
         getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
     }
 
-    public void closeLogicLinkConnection(int srcAddr, int dstAddr, int time, int linkId){
+    public void closeLogicLinkConnection(int srcAddr, int dstAddr, int time, int linkId, int servceSize){
         int servicePacketSize = 1;
-        Packet packet = new Packet(srcAddr, dstAddr, servicePacketSize, TransferType.LOGIC_CONNECTION, Status.DISCONNECTION, linkId);
+        Packet packet = new Packet(srcAddr, dstAddr, servceSize, 0, TransferType.LOGIC_CONNECTION, Status.DISCONNECTION, linkId);
         getNode(srcAddr).generatePacket(new PacketsQueueEntity(packet, srcAddr, time));
     }
 
@@ -210,7 +211,7 @@ public class Network {
 
     public void printShortestRoutesFromNode(Node node){
         for (int i = 0; i < node.getRoutesTable().getTable().size(); i++){
-//        for (RoutesTable.Entity entity : nodeAddr.getRoutesTable().getTable()){
+//        for (main.RoutesTable.Entity entity : nodeAddr.getRoutesTable().getTable()){
             Node buf = node;
             RoutesTable.Entity entity = buf.getRoutesTable().getTable().get(i);
             int helper = 0;
@@ -238,8 +239,8 @@ public class Network {
         }
 
 //        for (int i = 0; i < node.getRoutesTable().getTable().size(); i++){
-//            for (RoutesTable.Entity entity : node.getRoutesTable().getTable()){
-//                Node buf = node;
+//            for (main.RoutesTable.Entity entity : node.getRoutesTable().getTable()){
+//                main.Node buf = node;
 //
 //
 //            }
@@ -265,7 +266,7 @@ public class Network {
 
     @Override
     public String toString() {
-        return "Network{" +
+        return "main.Network{" +
                 "network=" + network +
                 '}';
     }

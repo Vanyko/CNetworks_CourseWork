@@ -1,7 +1,4 @@
-import GUI.GUI;
-
-import javax.swing.*;
-import java.util.ArrayList;
+package main;
 
 /**
  * Created by Vanyko on 11/15/18.
@@ -18,7 +15,7 @@ public class Main {
             System.out.println(node.toString());
         }
 
-        System.out.printf("Network power = %f\n", network.getPower());
+        System.out.printf("main.Network power = %f\n", network.getPower());
 
 //        network.generatePacketsOnAllNodes(0);
 
@@ -44,22 +41,22 @@ public class Main {
         System.out.printf("time = %d\n", time);
 
 //        network.generatePacket(0, 3, time);
-//        network.generateMessages(0, 3, time, 10, 3, TransferType.DATAGRAM);
-        network.generateLogicLinkConnection(0, 3, time, 0);
+//        network.generateMessages(0, 3, time, 10, 3, main.TransferType.DATAGRAM);
+        network.generateLogicLinkConnection(0, 3, time, 0, 1);
         boolean flag = true;
         while (flag){
             flag = network.tick(time);
             time++;
         }
 
-        network.generatePacket(0, 3, time, 10, TransferType.LOGIC_CONNECTION, Status.DATA, 0);
+        network.generatePacket(0, 3, time, 1, 10, TransferType.LOGIC_CONNECTION, Status.DATA, 0);
         flag = true;
         while (flag){
             flag = network.tick(time);
             time++;
         }
 
-        network.closeLogicLinkConnection(0, 3, time, 0);
+        network.closeLogicLinkConnection(0, 3, time, 0, 1);
         flag = true;
         while (flag){
             flag = network.tick(time);

@@ -1,3 +1,5 @@
+package main;
+
 import java.util.Random;
 
 /**
@@ -196,7 +198,7 @@ public class Canal {
 
     @Override
     public String toString() {
-        return "Canal{" +
+        return "main.Canal{" +
                 "weight=" + weight +
                 ", errorProbability=" + errorProbability +
                 ", type=" + type +

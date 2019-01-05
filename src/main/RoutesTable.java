@@ -1,3 +1,5 @@
+package main;
+
 import java.util.ArrayList;
 
 public class RoutesTable {
@@ -112,7 +114,7 @@ public class RoutesTable {
         return table;
     }
 
-//    public int getPrevAddr(Packet packet){
+//    public int getPrevAddr(main.Packet packet){
 //        for(Entity entity : table){
 //            if (entity.getSrcAddr() == packet.getSrcAddr() && entity.getDstAddr() == packet.getDstAddr()){
 //                return entity.getPrevAddr();
@@ -121,7 +123,7 @@ public class RoutesTable {
 //        return -1;
 //    }
 //
-//    public void correctRoute(Packet packet, boolean flag){
+//    public void correctRoute(main.Packet packet, boolean flag){
 ////        correctRoute(packet.getSrcAddr(), packet.getDstAddr(), nextAddr);
 //        int srcAddr = packet.getSrcAddr();
 //        int dstAddr = packet.getDstAddr();
@@ -140,7 +142,7 @@ public class RoutesTable {
 //        }
 //    }
 //
-//    public void correctCounter(Packet packet){
+//    public void correctCounter(main.Packet packet){
 //        int srcAddr = packet.getSrcAddr();
 //        int dstAddr = packet.getDstAddr();
 //        int counter = packet.getCounter();
@@ -156,7 +158,7 @@ public class RoutesTable {
 //        }
 //    }
 //
-//    public void correctRoute(Packet packet, int nextAddr, boolean flag){
+//    public void correctRoute(main.Packet packet, int nextAddr, boolean flag){
 ////        correctRoute(packet.getSrcAddr(), packet.getDstAddr(), nextAddr);
 //        int srcAddr = packet.getSrcAddr();
 //        int dstAddr = packet.getDstAddr();
@@ -175,7 +177,7 @@ public class RoutesTable {
 //        }
 //    }
 //
-////    public void correctRoute(Packet packet, int prevAddr, int nextAddr, boolean flag){
+////    public void correctRoute(main.Packet packet, int prevAddr, int nextAddr, boolean flag){
 //////        correctRoute(packet.getSrcAddr(), packet.getDstAddr(), nextAddr);
 ////        int srcAddr = packet.getSrcAddr();
 ////        int dstAddr = packet.getDstAddr();
@@ -195,7 +197,7 @@ public class RoutesTable {
 ////        }
 ////    }
 //
-//    public void correctPrevAddr(Packet packet, int prevAddr){
+//    public void correctPrevAddr(main.Packet packet, int prevAddr){
 //        int srcAddr = packet.getSrcAddr();
 //        int dstAddr = packet.getDstAddr();
 //        for (int i = 0; i < table.size(); i++){
@@ -248,7 +250,7 @@ public class RoutesTable {
         return -1;
     }
 
-//    public boolean alreadyIn(Packet packet){
+//    public boolean alreadyIn(main.Packet packet){
 //        for(Entity entity : table){
 //            if (entity.get() == dstAddr){
 //                return entity.getNextAddr();
@@ -260,7 +262,7 @@ public class RoutesTable {
 ////    public void setPacketDestination
 //
 //    // if rout already consists then return manageInputPackets counter, else -1
-//    public int routeCount(Packet packet){
+//    public int routeCount(main.Packet packet){
 //        for (Entity entity : table){
 //            if ((entity.getSrcAddr() == packet.getSrcAddr()) && (entity.getDstAddr() == packet.getDstAddr())){
 //                return entity.getCounter();
@@ -311,7 +313,7 @@ public class RoutesTable {
 
     @Override
     public String toString() {
-        return "RoutesTable{" +
+        return "main.RoutesTable{" +
                 "nodeAddr=" + nodeAddr +
                 ", table=" + table +
                 '}';

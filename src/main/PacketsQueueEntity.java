@@ -1,3 +1,5 @@
+package main;
+
 public class PacketsQueueEntity implements Comparable<PacketsQueueEntity>{
     private Packet packet;
     private int nodeAddr;
@@ -14,8 +16,6 @@ public class PacketsQueueEntity implements Comparable<PacketsQueueEntity>{
         this.nodeAddr = entity.getNodeAddr();
         this.time = entity.getTime();
     }
-
-    // TODO: return new Packet(packet) -> return packet;
     public Packet getPacket() {
         return packet;
     }
@@ -42,7 +42,7 @@ public class PacketsQueueEntity implements Comparable<PacketsQueueEntity>{
 
     @Override
     public String toString() {
-        return "PacketsQueueEntity{" +
+        return "main.PacketsQueueEntity{" +
                 "packet=" + packet +
                 ", nodeAddr=" + nodeAddr +
                 ", time=" + time +

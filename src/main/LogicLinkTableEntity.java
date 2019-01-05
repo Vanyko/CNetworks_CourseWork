@@ -1,3 +1,5 @@
+package main;
+
 public class LogicLinkTableEntity {
     private int id;
     private int time;
@@ -45,7 +47,7 @@ public class LogicLinkTableEntity {
 
     @Override
     public String toString() {
-        return "LogicLinkTableEntity{" +
+        return "main.LogicLinkTableEntity{" +
                 "id=" + id +
                 ", time=" + time +
                 ", status=" + status +

@@ -1,3 +1,5 @@
+package main;
+
 import java.util.*;
 
 /**
@@ -32,7 +34,7 @@ public class Node implements Comparable<Node>{
         this.virtualChanelsTable = new ArrayList<>();
     }
 
-//    public Node(Node node) {
+//    public main.Node(main.Node node) {
 //        this.id = node.id;
 //        this.neighbours = node.neighbours;
 //        this.routesTable = node.routesTable;
@@ -80,7 +82,7 @@ public class Node implements Comparable<Node>{
                 return node;
             }
         }
-//        for (Node nodeAddr : neighbours.keySet()){
+//        for (main.Node nodeAddr : neighbours.keySet()){
 //            if (nodeAddr.getId() == id){
 //                return nodeAddr;
 //            }
@@ -90,7 +92,7 @@ public class Node implements Comparable<Node>{
 
     @Override
     public String toString() {
-        String result =  "\nNode{" + "id=" + id + ",neighbours=";
+        String result =  "\nmain.Node{" + "id=" + id + ",neighbours=";
         for (Node node : neighbours.keySet()){
             result += "nodeId=";
             result += node.getId();
@@ -98,7 +100,7 @@ public class Node implements Comparable<Node>{
             result += neighbours.get(node).getId();
             result += ",";
         }
-        result += "RoutesTable{" + routesTable + "}" +
+        result += "main.RoutesTable{" + routesTable + "}" +
                 ", inputPacketsQueue=" + inputPacketsQueue +
                 ", outputPacketsQueue=" + outputPacketsQueue +
                 ", notDeliveredPackets=" + notDeliveredPackets;
@@ -219,7 +221,7 @@ public class Node implements Comparable<Node>{
 //                routesTable.correctRoute(entity);
             }
         } else if (entity.getPacket().isNACK()){
-//            outputPacketsQueue.add(new PacketsQueueEntity(entity));
+//            outputPacketsQueue.add(new main.PacketsQueueEntity(entity));
             PacketsQueueEntity notDelivered = getNotDeliveredPacket(entity);
             entity.setTime(currentTime);
             outputPacketsQueue.add(notDelivered);
@@ -236,7 +238,7 @@ public class Node implements Comparable<Node>{
                     // decide of make a connection
                     int srcAddr = entity.getPacket().getSrcAddr();
                     outputPacketsQueue.add(new PacketsQueueEntity(
-                            new Packet(this.id, srcAddr, 1, TransferType.LOGIC_CONNECTION, Status.CONNECTION_ACK), entity.getNodeAddr(), currentTime));
+                            new Packet(this.id, srcAddr, 1, 0,TransferType.LOGIC_CONNECTION, Status.CONNECTION_ACK), entity.getNodeAddr(), currentTime));
                 } else {
                     route(entity);
                 }
@@ -244,7 +246,6 @@ public class Node implements Comparable<Node>{
                 if (entity.getPacket().getDstAddr() == this.id) {
                     // connection successful
                     System.out.println("connection successful");
-//                     TODO: rewrite logic link table
                     LogicLinkTableEntity logicLink = getLogicLinkEntityById(entity.getPacket().getLinkId());
                     if (logicLink != null){
                         logicLink.setStatus(Status.DATA);
@@ -255,10 +256,9 @@ public class Node implements Comparable<Node>{
             } else if (entity.getPacket().getStatus() == Status.DISCONNECTION) {
                 if (entity.getPacket().getDstAddr() == this.id) {
                     // decide of make a disconnection
-                    // TODO: delete entity in logicLinkTable
                     int srcAddr = entity.getPacket().getSrcAddr();
                     outputPacketsQueue.add(new PacketsQueueEntity(
-                            new Packet(this.id, srcAddr, 1, TransferType.LOGIC_CONNECTION, Status.DISCONNECTION_ACK), entity.getNodeAddr(), currentTime));
+                            new Packet(this.id, srcAddr, 1, 0, TransferType.LOGIC_CONNECTION, Status.DISCONNECTION_ACK), entity.getNodeAddr(), currentTime));
                 } else {
                     route(entity);
                 }
@@ -266,10 +266,8 @@ public class Node implements Comparable<Node>{
                 if (entity.getPacket().getDstAddr() == this.id) {
                     // connection successful
                     System.out.println("disconnection successful");
-                    // TODO: delete entity in logicLinkTable
                     LogicLinkTableEntity logicLink = getLogicLinkEntityById(entity.getPacket().getLinkId());
                     if (logicLink != null){
-//                        logicLink.setStatus(Status.DISCONNECTION_ACK);
                         logicLinksTable.remove(logicLink);
                     }
                 } else {
@@ -280,8 +278,8 @@ public class Node implements Comparable<Node>{
     }
 
     public void manageDeliveredPacket(PacketsQueueEntity entity){
-//        outputPacketsQueue.add(new PacketsQueueEntity(new Packet(entity.getPacket(), Status.ACK), entity.getNodeAddr()));  // Send ACK to prev node
-//        System.out.printf("Packet %s delivered!\n", entity.getPacket());
+//        outputPacketsQueue.add(new main.PacketsQueueEntity(new main.Packet(entity.getPacket(), main.Status.ACK), entity.getNodeAddr()));  // Send ACK to prev node
+//        System.out.printf("main.Packet %s delivered!\n", entity.getPacket());
         // Add it to routes table
 //                        // TODO: check next line
 //                        routesTable.addPacket(packet, entity.getNodeAddr());
@@ -321,9 +319,9 @@ public class Node implements Comparable<Node>{
                 sendToAllNeighbours(entity);
             }
         }
-//        else if (packet.getTransferType() == TransferType.LOGIC_CONNECTION){
+//        else if (packet.getTransferType() == main.TransferType.LOGIC_CONNECTION){
 //            // if logic conn is in connection mode, then delay packet, else generate connection
-////            if ((getStatusByLogicLinkId() != null) && (getStatusByLogicLinkId() == Status.CONNECTION)){
+////            if ((getStatusByLogicLinkId() != null) && (getStatusByLogicLinkId() == main.Status.CONNECTION)){
 ////
 ////            }
 //        }
@@ -367,7 +365,7 @@ public class Node implements Comparable<Node>{
                     // Send ACK to prev node
                     if (manageACK(entity)) {
                         if (alreadyIn(entity)) {
-
+                            // TODO: if new route is shorter, rewrite old route
                         } else {
                             if (packet.getDstAddr() == this.id) {
                                 manageDeliveredPacket(entity);
